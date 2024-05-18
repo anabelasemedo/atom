@@ -1,36 +1,38 @@
-version: '3.7'
+version: '3.8'
 
 services:
-  mysql:
-    image: mysql:5.7
-    container_name: atom_mysql
-    restart: always
+  db:
+    image: mysql:8.0
+    volumes:
+      - mysql_data:/var/lib/mysql
     environment:
       MYSQL_ROOT_PASSWORD: root_password
       MYSQL_DATABASE: atom
       MYSQL_USER: atom
-      MYSQL_PASSWORD: atom_password
+      MYSQL_PASSWORD: 12345
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:5.6.16
+    environment:
+      - discovery.type=single-node
     volumes:
-      - mysql_data:/var/lib/mysql
+      - es_data:/usr/share/elasticsearch/data
 
   atom:
     build: .
-    container_name: atom
-    restart: always
-    environment:
-      SYMFONY__DATABASE__HOST: mysql
-      SYMFONY__DATABASE__PORT: 3306
-      SYMFONY__DATABASE__NAME: atom
-      SYMFONY__DATABASE__USER: atom
-      SYMFONY__DATABASE__PASSWORD: atom_password
-    depends_on:
-      - mysql
     ports:
       - "8081:80"
     volumes:
-      - atom_data:/var/www/html
+      - .:/usr/share/nginx/atom
+    depends_on:
+      - db
+      - elasticsearch
+    environment:
+      MYSQL_DATABASE: atom
+      MYSQL_USER: atom
+      MYSQL_PASSWORD: 12345
+      MYSQL_ROOT_PASSWORD: root_password
 
 volumes:
   mysql_data:
-  atom_data:
-
+  es_data:
