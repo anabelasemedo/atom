@@ -1,0 +1,36 @@
+version: '3.7'
+
+services:
+  mysql:
+    image: mysql:5.7
+    container_name: atom_mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root_password
+      MYSQL_DATABASE: atom
+      MYSQL_USER: atom
+      MYSQL_PASSWORD: atom_password
+    volumes:
+      - mysql_data:/var/lib/mysql
+
+  atom:
+    build: .
+    container_name: atom
+    restart: always
+    environment:
+      SYMFONY__DATABASE__HOST: mysql
+      SYMFONY__DATABASE__PORT: 3306
+      SYMFONY__DATABASE__NAME: atom
+      SYMFONY__DATABASE__USER: atom
+      SYMFONY__DATABASE__PASSWORD: atom_password
+    depends_on:
+      - mysql
+    ports:
+      - "8081:80"
+    volumes:
+      - atom_data:/var/www/html
+
+volumes:
+  mysql_data:
+  atom_data:
+
